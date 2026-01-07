@@ -1,174 +1,36 @@
-# Invisible City Flows
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-Invisible City Flows is an experimental urban visualization web app that reveals invisible environmental data such as air quality, weather, noise, and urban stress through an interactive map.
+## Getting Started
 
-This repository contains the Frontend MVP, built with Next.js, TypeScript, Tailwind CSS, and MapLibre GL JS.
+First, run the development server:
 
-✨ Features (MVP)
-
-🗺️ Interactive Map (MapLibre + OpenStreetMap, no API key)
-
-🧩 4 Data Layers
-
-Air Quality (PM2.5, NO₂)
-
-Weather (Temperature)
-
-Noise Level (dB)
-
-Stress Index (synthetic indicator)
-
-🎛️ Sidebar Controls
-
-Toggle each layer on/off
-
-Adjust layer opacity in real time
-
-Simple color legend (min/max)
-
-📍 Map Interaction
-
-Click on the map to place a marker
-
-Info panel updates with coordinates and mock values
-
-🌍 City Selector (Mock)
-
-Berlin
-
-Paris
-
-Nürnberg
-
-📡 Locate Me
-
-Uses browser geolocation
-
-Recenters the map on the user position
-
-🧪 Demo Mode
-
-No real APIs
-
-Stable mock data using seeded random values
-
-🧱 Tech Stack
-
-Framework: Next.js 14+ (App Router)
-
-Language: TypeScript
-
-Styling: Tailwind CSS
-
-Mapping: MapLibre GL JS
-
-Data: In-memory GeoJSON (mocked)
-
-📁 Project Structure
-app/
-  layout.tsx
-  page.tsx
-  globals.css
-
-components/
-  Header.tsx
-  Sidebar.tsx
-  InfoPanel.tsx
-  ui/
-    Toggle.tsx
-    OpacitySlider.tsx
-
-map/
-  MapView.tsx
-  layers/
-    airLayer.ts
-    meteoLayer.ts
-    noiseLayer.ts
-    stressLayer.ts
-
-demo/
-  demoData.ts
-
-utils/
-  seededRandom.ts
-  normalize.ts
-  stressIndex.ts
-
-types.ts
-
-🚀 Getting Started
-1️⃣ Install dependencies
-npm install
-
-2️⃣ Run the development server
+```bash
 npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
 
-3️⃣ Open the app
-http://localhost:3000
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-🧠 How It Works (High-Level)
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-MapLibre is rendered client-side only to avoid SSR issues.
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-Each environmental layer is:
+## Learn More
 
-A GeoJSON source
+To learn more about Next.js, take a look at the following resources:
 
-A dedicated MapLibre layer
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-Layer visibility is controlled via:
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-setLayoutProperty(visibility)
+## Deploy on Vercel
 
-Opacity is controlled via:
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-setPaintProperty(circle-opacity | fill-opacity)
-
-Mock values are deterministic:
-
-Generated from latitude/longitude using a seeded random function
-
-Values remain stable between clicks and renders
-
-🧪 Demo Data
-
-Air Layer
-Random points around city center with PM2.5 / NO₂ values
-
-Weather Layer
-Generated at click position
-
-Noise Layer
-Grid-based polygons colored by noise intensity
-
-Stress Layer
-Grid-based polygons using a synthetic stress index
-
-⚠️ No real APIs are used in the MVP.
-
-🔮 Roadmap / TODO
-
-🔌 Connect real data sources:
-
-OpenAQ (Air Quality)
-
-Open-Meteo (Weather)
-
-OpenStreetMap / Urban datasets
-
-🧭 Time-based visualization (temporal slider)
-
-📊 Charts and trends per location
-
-💾 Persistent state (URL / local storage)
-
-📱 Mobile UX improvements
-
-🧑‍💻 Author
-
-Built as an experimental frontend MVP for exploring urban data visualization and map-based UI architecture.
-
-📄 License
-
-MIT — feel free to use, modify, and build upon it.
-
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
