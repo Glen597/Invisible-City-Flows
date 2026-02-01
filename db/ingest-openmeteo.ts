@@ -1,59 +1,68 @@
 import "dotenv/config";
 import { db, sql } from "./client";
-import { cities, metrics, observations } from "./schema";  
+import { cities, metrics, observations } from "./schema";
 import { eq } from "drizzle-orm";
-
 
 async function main() {
 
-    // Fetch data from Open-Meteo API (example for temperature and windspeed)
-    const berlin = await db.query.cities.findFirst({
-        where: eq(cities.name, "Berlin"),
-    });
+  // 1️⃣ Récupérer TOUTES les villes
+  const allCities = await db.select().from(cities);
 
-    if (!berlin) throw new Error("City not found in the database.");
-    
-    //2 Fetch temperature data for Berlin
-    const tempMetric = await db.query.metrics.findFirst({
-        where: eq(metrics.key, "temperature"),
-    });
+  if (allCities.length === 0) {
+    throw new Error("No cities found in database.");
+  }
 
-    if (!tempMetric) throw new Error("Temperature metric not found in the database.");
+  // 2️⃣ Récupérer la métrique "temperature"
+  const tempMetric = await db.query.metrics.findFirst({
+    where: eq(metrics.key, "temperature"),
+  });
 
-    // Fetch data from Open-Meteo API (example for temperature and windspeed)
-    const url =`https://api.open-meteo.com/v1/forecast` +
-  `?latitude=${berlin.centerLat}` +
-  `&longitude=${berlin.centerLng}` +
-  `&current_weather=true` +
-  `&timezone=${encodeURIComponent(berlin.timezone || 'UTC')}`;
-        
-   const response = await fetch(url);
+  if (!tempMetric) {
+    throw new Error("Temperature metric not found.");
+  }
+
+  // 3️⃣ Boucle sur chaque ville
+  for (const city of allCities) {
+
+    console.log(`🌍 Fetching weather for ${city.name}...`);
+
+    // 4️⃣ Appel Open-Meteo pour la ville
+    const url =
+      `https://api.open-meteo.com/v1/forecast` +
+      `?latitude=${city.centerLat}` +
+      `&longitude=${city.centerLng}` +
+      `&current_weather=true` +
+      `&timezone=${encodeURIComponent(city.timezone ?? "UTC")}`;
+
+    const response = await fetch(url);
     const data = await response.json();
 
     const current = data.current_weather;
     if (!current) {
-        throw new Error("No current weather data available.");
+      console.warn(`⚠️ No weather data for ${city.name}`);
+      continue;
     }
 
     const temperature = current.temperature as number;
     const time = current.time as string;
 
-    // Insert observation into the database
+    // 5️⃣ Insertion en base
     await db.insert(observations).values({
-        cityId: berlin.id,
-        metricId: tempMetric.id,
-        source: "openmeteo",
-        value: temperature,
-        lng: berlin.centerLng,
-        lat: berlin.centerLat,
-        measuredAt: new Date(time + "Z"), // Append 'Z' to indicate UTC
+      cityId: city.id,
+      metricId: tempMetric.id,
+      value: temperature,
+      source: "open-meteo",
+      lng: city.centerLng,
+      lat: city.centerLat,
+      measuredAt: new Date(time + "Z"),
     });
 
-    console.log(`✅ Ingested ${temperature}°C for Berlin at ${time}`);
+    console.log(`✅ ${city.name}: ${temperature}°C at ${time}`);
+  }
 }
 
 main()
-.catch(console.error)
-.finally( async() => {
-   await sql.end({timeout: 5}); 
-});
+  .catch(console.error)
+  .finally(async () => {
+    await sql.end({ timeout: 5 });
+  });

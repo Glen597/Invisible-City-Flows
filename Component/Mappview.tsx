@@ -20,6 +20,7 @@ const MapView: React.FC<Props> = ({ onMapClick }) => {
   useEffect(() => {
     if (!mapContainerRef.current) return;
     if (mapRef.current) return; // Initialize map only once
+    
 
     console.log("Initializing map...", mapContainerRef.current);
 
@@ -31,6 +32,7 @@ const MapView: React.FC<Props> = ({ onMapClick }) => {
     });
 
     mapRef.current = map;
+    map.getCanvas().style.cursor = "crosshair";
 
     map.on("load", () => {
       console.log("Map loaded");
