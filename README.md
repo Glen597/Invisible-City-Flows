@@ -1,94 +1,87 @@
-##🌆 Invisible City Flows
+# Invisible City Flows
 
-Invisible City Flows is an interactive web application that reveals hidden urban data—such as air quality, weather, noise, and urban stress—based on a geographical point selected on a map.
-The project focuses on combining geospatial interaction, environmental data, and a modern full-stack architecture.
+Invisible City Flows is an interactive web application designed to explore hidden urban data such as air quality, weather, noise levels, and urban stress through a map-based interface.
 
-#✨ Key Features
+The project focuses on geospatial visualization, clean API design, and a scalable modern web architecture.
 
-🗺️ Interactive map with click-based location selection
+---
 
-📊 Real-time environmental indicators per location
+## Features
 
-🧱 Modular UI using reusable data cards
+- Interactive map with geolocation-based queries
+- Environmental data retrieval per geographic point
+- Modular user interface built with reusable data cards
+- PostgreSQL database with a fully typed ORM
+- High-performance API powered by Next.js (App Router)
 
-🧠 Aggregation of multiple urban metrics
+```
 
-🛢️ Relational database with PostgreSQL & Drizzle ORM
+## Project Structure
 
-⚡ API built with Next.js App Router
-
-#🧩 Project Architecture
-~~~
 Invisible-City-Flows/
 ├── app/
-│   ├── api/
-│   │   └── point/            # Main API endpoint (GET ?lng=&lat=)
-│   └── page.tsx              # Main page (Map + UI)
+│ ├── api/
+│ │ └── point/ # Main endpoint (GET ?lng=&lat=)
+│ └── page.tsx # Main page (UI + Map)
 │
 ├── Component/
-│   ├── MapView.tsx           # Interactive map component
-│   └── DataCard.tsx          # Reusable metric card
+│ ├── MapView.tsx # Interactive map
+│ └── DataCard.tsx # Reusable data card component
 │
 ├── db/
-│   ├── schema.ts             # Drizzle database schema
-│   └── index.ts              # Database client
+│ ├── schema.ts # Drizzle database schema
+│ └── index.ts # Database client
 │
-├── drizzle/                  # Generated SQL migrations
+├── drizzle/ # Generated SQL migrations
 ├── drizzle.config.ts
-├── types/                    # Shared TypeScript types
+├── types/ # Shared API types
 └── README.md
 
-~~~
-#🛠️ Tech Stack
-Frontend
+```
 
-Next.js 14 (App Router)
+## Tech Stack
 
-React
+### Frontend
+- Next.js 14 (App Router)
+- React
+- TypeScript
+- Tailwind CSS
 
-TypeScript
+### Backend
+- Next.js API Routes
+- Drizzle ORM
+- PostgreSQL
+- pg driver
 
-Tailwind CSS
+---
 
-Backend
+## Database
 
-Next.js API Routes
+The database schema consists of four main tables:
 
-Drizzle ORM
+| Table | Description |
+|------|------------|
+| cities | City information |
+| stations | Measurement stations |
+| metrics | Metric definitions (air, noise, etc.) |
+| observations | Environmental observations |
 
-PostgreSQL
+Relationships are enforced using foreign keys and optimized with indexes for performance and data integrity.
 
-pg driver
+---
 
-#🗄️ Database Schema
+## Data Flow
 
-The current database design includes four core tables:
+1. The user clicks on the map
+2. Geographic coordinates (lng, lat) are sent to the API
+3. The backend queries the database
+4. Data is aggregated by category
+5. The user interface updates the data cards accordingly
 
-Table	Description
-cities	City-level metadata
-stations	Measurement stations
-metrics	Metric definitions (air, noise, etc.)
-observations	Measured values per station
+---
 
-All relations are enforced using foreign keys and optimized with indexes.
-
-#🔁 Data Flow
-
-User clicks on the map
-
-Coordinates (longitude, latitude) are sent to /api/point
-
-The API:
-
-queries the database
-
-aggregates relevant metrics
-
-returns a structured response
-
-The frontend updates the UI using DataCard components
-
-📦 Example API Response
+## API Response Example
+```ts
 type PointApiResponse = {
   air: {
     pm25: number | null
@@ -105,69 +98,35 @@ type PointApiResponse = {
     label: string
   }
 }
+```
+##  Database Migrations
+ Generate migrations:
 
-#🧱 DataCard Component
-
-Reusable UI component for displaying a single metric:
-
-<DataCard
-  title="Air"
-  value="12 μg/m³"
-  subtitle="Air quality index"
-  className="border-l-4 border-blue-400"
-/>
-
-Characteristics
-
-Accepts external styling via className
-
-Fully reusable and data-agnostic
-
-Suitable for a scalable design system
-
-#🧪 Database Migrations
-Generate migrations
 npm run db:gen
 
-#Apply migrations
+Apply migrations:
+
 npm run db:migrate
 
+ If Drizzle reports no schema changes, the database is already synchronized.
 
-If Drizzle outputs “No schema changes, nothing to migrate”, the database is already synchronized ✅
+## Running the Project
 
-#🚀 Running the Project
 npm install
 npm run dev
-
 
 Then open:
 
 http://localhost:3000
 
-##🔮 Planned Improvements
+## Roadmap
+- Historical data visualization
+- Dark mode support
+- Dynamic city selection
+- Automated database seeding
+- Mobile responsiveness
 
-📈 Historical data & time series
-
-🌙 Dark mode
-
-🧭 Dynamic city selection
-
-🌱 Database seeding
-
-📱 Mobile responsiveness
-
-🧠 Composite urban comfort index
-
-#👤 Author
-
-Personal project focused on urban data visualization, modern full-stack architecture, and clean, scalable code design.
-
-If you want next:
-
-a more academic / report-style documentation
-
-a final polished README with badges
-
-or an API documentation (Swagger-style)
-
-just tell me 👌
+    Composite urban comfort index
+---
+## Author
+Personal project focused on urban data visualization, software architecture, and code quality.
