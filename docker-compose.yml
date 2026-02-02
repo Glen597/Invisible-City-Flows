@@ -7,7 +7,7 @@ services:
     restart: always
     environment:
       POSTGRES_USER: icf
-      POSTGRES_PASSWORD: icf
+      POSTGRES_PASSWORD: icfpassword
       POSTGRES_DB: invisible_city_flows
     ports:
       - "5432:5432"
