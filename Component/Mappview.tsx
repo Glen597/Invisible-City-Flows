@@ -6,15 +6,18 @@ import { SelectedPoint } from "../types";
 
 type Props = {
   onMapClick: (coords: SelectedPoint) => void;
+  center?: [number, number] | null;
 };
 
-const MapView: React.FC<Props> = ({ onMapClick }) => {
+const MapView: React.FC<Props> = ({ onMapClick, center }) => {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const markerRef = useRef<maplibregl.Marker | null>(null);
   
   const [noiseVisible, setNoiseVisible] = useState(true);
   const [noiseOpacity, setNoiseOpacity] = useState(0.5);
+  const [temperatureVisible, setTemperatureVisible] = useState(true);
+
 
   // Main map initialization
   useEffect(() => {
@@ -23,6 +26,7 @@ const MapView: React.FC<Props> = ({ onMapClick }) => {
     
 
     console.log("Initializing map...", mapContainerRef.current);
+    
 
     const map = new maplibregl.Map({
       container: mapContainerRef.current,
@@ -30,6 +34,8 @@ const MapView: React.FC<Props> = ({ onMapClick }) => {
       center: [13.4050, 52.5200], // Berlin
       zoom: 12,
     });
+
+    
 
     mapRef.current = map;
     map.getCanvas().style.cursor = "crosshair";
@@ -88,6 +94,31 @@ const MapView: React.FC<Props> = ({ onMapClick }) => {
       }
     });
 
+    map.addSource("temperature-source", {
+  type: "geojson",
+  data: { type: "FeatureCollection", features: [] },
+});
+map.addLayer({
+  id: "temperature-layer",
+  type: "circle",
+  source: "temperature-source",
+  paint: {
+    "circle-radius": 10,
+    "circle-color": [
+      "interpolate",
+      ["linear"],
+      ["get", "value"],
+      0, "#2c7bb6",   // cold
+      10, "#abd9e9",
+      20, "#fdae61",
+      30, "#d7191c"   // hot
+    ],
+    "circle-opacity": 0.8,
+  },
+});
+
+
+
     // Function to refresh noise layer
     async function refreshNoise() {
       if (!map.isStyleLoaded()) return;
@@ -107,6 +138,31 @@ const MapView: React.FC<Props> = ({ onMapClick }) => {
         console.error("Error fetching noise data:", error);
       }
     }
+
+    async function refreshTemperature() {
+  if (!map.isStyleLoaded()) return;
+
+  const b = map.getBounds();
+  const bbox = `${b.getWest()},${b.getSouth()},${b.getEast()},${b.getNorth()}`;
+
+  try {
+    const res = await fetch(`/api/layers?layer=temperature&bbox=${bbox}`);
+    const geojson = await res.json();
+
+    const source = map.getSource("temperature-source") as maplibregl.GeoJSONSource;
+    if (source) {
+      source.setData(geojson);
+    }
+  } catch (e) {
+    console.error("Temperature layer error", e);
+  }
+}
+
+
+map.on("moveend", () => {
+  refreshNoise();
+  refreshTemperature();
+});
 
     // Cleanup function
     return () => {
@@ -139,6 +195,29 @@ const MapView: React.FC<Props> = ({ onMapClick }) => {
 
     map.setPaintProperty("noise-fill", "fill-opacity", noiseOpacity);
   }, [noiseOpacity]);
+
+  useEffect(() => {
+  if (!mapRef.current || !center) return;
+
+  mapRef.current.flyTo({
+    center,
+    zoom: 13,
+  });
+}, [center]);
+
+useEffect(() => {
+  const map = mapRef.current;
+  if (!map) return;
+  if (!map.getLayer("temperature-layer")) return;
+
+  map.setLayoutProperty(
+    "temperature-layer",
+    "visibility",
+    temperatureVisible ? "visible" : "none"
+  );
+}, [temperatureVisible]);
+
+
 
   return (
     <div ref={mapContainerRef} className="h-screen w-full" />

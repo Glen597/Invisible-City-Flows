@@ -1,51 +1,51 @@
-import { NextResponse } from "next/server";
-import { generateGrid } from "@/utils/grid";
-import { seeded01 } from "@/utils/seeded";
-import { normalize } from "@/utils/normalize";
+import { NextRequest } from "next/server";
+import { db } from "@/db/client";
+import { observations, metrics} from "@/db/schema";
+import { eq, desc } from "drizzle-orm";
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
+  const layer = searchParams.get("layer");
 
-  const layer = searchParams.get("layer"); // noise | stress
-  const bboxStr = searchParams.get("bbox");
-
-  if (!layer || !bboxStr) {
-    return NextResponse.json({ error: "Missing layer or bbox" }, { status: 400 });
+  if (layer !== "temperature") {
+    return Response.json({ error: "Invalid layer" }, { status: 400 });
   }
 
-  const parts = bboxStr.split(",").map(Number);
-  if (parts.length !== 4 || parts.some(Number.isNaN)) {
-    return NextResponse.json({ error: "Invalid bbox format" }, { status: 400 });
-  }
-
-  const [minLng, minLat, maxLng, maxLat] = parts;
-
-  const cells = generateGrid(minLng, minLat, maxLng, maxLat, 12, 12);
-
-  const features = cells.map((cell) => {
-    const key = `${Math.round(cell.centerLng * 1000)}:${Math.round(cell.centerLat * 1000)}`;
-    const noise = seeded01(key);
-
-    // Stress: for now only based on noise (we'll improve later using temp)
-    const stress = normalize(noise, 0, 1); // 0..1
-
-    const value = layer === "stress" ? stress : noise;
-
-    return {
-      type: "Feature",
-      geometry: {
-        type: "Polygon",
-        coordinates: [[
-          [cell.minLng, cell.minLat],
-          [cell.maxLng, cell.minLat],
-          [cell.maxLng, cell.maxLat],
-          [cell.minLng, cell.maxLat],
-          [cell.minLng, cell.minLat],
-        ]],
-      },
-      properties: { value },
-    };
+  // 1️⃣ Get temperature metric
+  const metric = await db.query.metrics.findFirst({
+    where: eq(metrics.key, "temperature"),
   });
 
-  return NextResponse.json({ type: "FeatureCollection", features });
+  if (!metric) {
+    return Response.json({ error: "Metric not found" }, { status: 500 });
+  }
+
+  // 2️⃣ Get latest temperature per city
+  const rows = await db
+    .select({
+      value: observations.value,
+      lng: observations.lng,
+      lat: observations.lat,
+    })
+    .from(observations)
+    .where(eq(observations.metricId, metric.id))
+    .orderBy(desc(observations.measuredAt))
+    .limit(50);
+
+  // 3️⃣ Convert to GeoJSON
+  const features = rows.map((r) => ({
+    type: "Feature",
+    geometry: {
+      type: "Point",
+      coordinates: [r.lng, r.lat],
+    },
+    properties: {
+      value: r.value,
+    },
+  }));
+
+  return Response.json({
+    type: "FeatureCollection",
+    features,
+  });
 }

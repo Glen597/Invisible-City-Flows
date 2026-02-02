@@ -16,6 +16,8 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const lng = Number(searchParams.get("lng"));
   const lat = Number(searchParams.get("lat"));
+  const cityName = searchParams.get("city") ?? "Berlin";
+
   
   if (Number.isNaN(lng) || Number.isNaN(lat)) {
     return NextResponse.json({ error: "Invalid lng/lat" }, { status: 400 });

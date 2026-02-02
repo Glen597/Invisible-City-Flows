@@ -8,6 +8,52 @@ import { useState } from "react";
 export default function Home() {
 
   const [pointData, setPointData] = useState<PointApiResponse | null>(null);
+  const [searchCity, setSearchCity] = useState("");
+  const [mapCenter, setMapCenter] = useState<[number, number] | null>(null);
+  const [loading, setLoading] = useState(false);
+
+
+
+ async function handleCitySearch() {
+  const q = searchCity.trim();
+  if (!q) return;
+
+  setLoading(true);
+
+  try {
+    // 1️⃣ Ingestion + geocoding
+    const resCity = await fetch(`/api/city?name=${encodeURIComponent(q)}`);
+    const cityData = await resCity.json();
+
+    if (!resCity.ok) {
+      alert(cityData?.error ?? "City not found");
+      return;
+    }
+
+    const lng = cityData.city.lng;
+    const lat = cityData.city.lat;
+
+    // 2️⃣ Move map
+    setMapCenter([lng, lat]);
+
+    // 3️⃣ READ DB (single source of truth)
+    const resPoint = await fetch(`/api/point?lng=${lng}&lat=${lat}`);
+    const pointJson: PointApiResponse = await resPoint.json();
+
+    if (!resPoint.ok) {
+      alert("Could not load point data");
+      return;
+    }
+
+    setPointData(pointJson);
+  } catch (err) {
+    console.error(err);
+    alert("Server error");
+  } finally {
+    setLoading(false);
+  }
+}
+
   async function handleMapClick(coords: { lng: number; lat: number }) {
   try {
     const res = await fetch(
@@ -30,26 +76,34 @@ export default function Home() {
     <div className="w-2 h-2 rounded-full bg-blue-500" />
     <span className="font-semibold text-lg">Invisible City Flows</span>
   </div>
-
-  <select className="border rounded-md px-3 py-1 text-sm bg-gray-50">
-    <option>Berlin</option>
-    <option>Paris</option>
-    <option>Nürnberg</option>
-  </select>
+  <input
+  type="text"
+  placeholder="Search a city..."
+  className="border rounded-md px-3 py-1 text-sm w-56 bg-gray-50"
+  value={searchCity}
+  onChange={(e) => setSearchCity(e.target.value)}
+  onKeyDown={(e) => {
+    if (e.key === "Enter") {
+      handleCitySearch();
+    }
+  }}
+/>
 </header>
 
       {/* MAIN CONTENT */}
       <div className="flex flex-1 overflow-hidden">
 
         {/* LEFT PANEL */}
-        <aside className="w-[320px] border-r bg-gray-50 p-3 overflow-y-auto">
+        <aside className="w-[320px] border-r bg-gray-50 p-3 overflow-y-auto"> 
   <div className="space-y-3">
 
     <DataCard
       title="Air"
-       value={pointData?.air.pm25 !== null
-        ? `${pointData?.air.pm25} μg/m³`
-        : "—"}
+       value={
+  pointData?.air?.pm25 != null
+    ? `${Math.round(pointData.air.pm25)} μg/m³`
+    : "—"
+}
       subtitle="Air quality index"
        className="border-l-4 border-green-400"
     />
@@ -66,10 +120,12 @@ export default function Home() {
 
     <DataCard
       title="Noise"
-      value={pointData
-        ? `${Math.round(pointData.noise.level * 100)} %`
-        : "—"}
-      subtitle={pointData?.noise.label}
+      value={
+  pointData?.noise?.level != null
+    ? `${Math.round(pointData.noise.level * 100)} %`
+    : "—"
+}
+subtitle={pointData?.noise?.label ?? ""}
        className="border-l-4 border-yellow-400"
     />
 
@@ -87,7 +143,8 @@ export default function Home() {
 
         {/* MAP */}
         <main className="flex-1 relative">
-          <MapView onMapClick={handleMapClick} />
+          <MapView onMapClick={handleMapClick} 
+          center={mapCenter}/>
         </main>
 
       </div>
