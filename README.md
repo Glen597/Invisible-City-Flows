@@ -1,7 +1,9 @@
+##🌆 Invisible City Flows
+
 Invisible City Flows is an interactive web application that reveals hidden urban data—such as air quality, weather, noise, and urban stress—based on a geographical point selected on a map.
 The project focuses on combining geospatial interaction, environmental data, and a modern full-stack architecture.
 
-✨ Key Features
+#✨ Key Features
 
 🗺️ Interactive map with click-based location selection
 
@@ -15,7 +17,7 @@ The project focuses on combining geospatial interaction, environmental data, and
 
 ⚡ API built with Next.js App Router
 
-🧩 Project Architecture
+#🧩 Project Architecture
 ~~~
 Invisible-City-Flows/
 ├── app/
@@ -37,7 +39,7 @@ Invisible-City-Flows/
 └── README.md
 
 ~~~
-🛠️ Tech Stack
+#🛠️ Tech Stack
 Frontend
 
 Next.js 14 (App Router)
@@ -58,7 +60,7 @@ PostgreSQL
 
 pg driver
 
-🗄️ Database Schema
+#🗄️ Database Schema
 
 The current database design includes four core tables:
 
@@ -70,7 +72,7 @@ observations	Measured values per station
 
 All relations are enforced using foreign keys and optimized with indexes.
 
-🔁 Data Flow
+#🔁 Data Flow
 
 User clicks on the map
 
@@ -104,7 +106,7 @@ type PointApiResponse = {
   }
 }
 
-🧱 DataCard Component
+#🧱 DataCard Component
 
 Reusable UI component for displaying a single metric:
 
@@ -123,17 +125,17 @@ Fully reusable and data-agnostic
 
 Suitable for a scalable design system
 
-🧪 Database Migrations
+#🧪 Database Migrations
 Generate migrations
 npm run db:gen
 
-Apply migrations
+#Apply migrations
 npm run db:migrate
 
 
 If Drizzle outputs “No schema changes, nothing to migrate”, the database is already synchronized ✅
 
-🚀 Running the Project
+#🚀 Running the Project
 npm install
 npm run dev
 
@@ -142,7 +144,7 @@ Then open:
 
 http://localhost:3000
 
-🔮 Planned Improvements
+##🔮 Planned Improvements
 
 📈 Historical data & time series
 
@@ -156,7 +158,7 @@ http://localhost:3000
 
 🧠 Composite urban comfort index
 
-👤 Author
+#👤 Author
 
 Personal project focused on urban data visualization, modern full-stack architecture, and clean, scalable code design.
 
